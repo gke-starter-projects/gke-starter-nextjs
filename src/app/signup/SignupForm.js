@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { Formik, Form } from 'formik';
+import { useRouter } from 'next/navigation';
+
 import {
   Container,
   Box,
@@ -15,6 +17,8 @@ import {
 import signupValidationSchema from '../../schemas/signup';
 
 function SignupForm({ onSubmit = () => Promise.reject(new Error('onSubmit handler not provided')) }) {
+  const router = useRouter();
+
   const initialValues = {
     username: '',
     email: '',
@@ -58,6 +62,8 @@ function SignupForm({ onSubmit = () => Promise.reject(new Error('onSubmit handle
                 });
                 setStatus({ success: 'Account created successfully!' });
                 resetForm();
+                // Successful signup
+                router.push('/dashboard');
               } catch (error) {
                 setStatus({ error: error.message });
               } finally {

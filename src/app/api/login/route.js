@@ -2,10 +2,10 @@
 
 import bcrypt from 'bcrypt';
 import { NextResponse } from 'next/server';
-import { SignJWT } from 'jose';
 import * as yup from 'yup';
 import query from '../../../db';
 import addCommonHeaders from '../common-options';
+import { createJwtToken, setAuthTokenCookie } from '../../utils/jwt-serverside';
 
 // Create login validation schema
 const loginSchema = yup.object().shape({
@@ -57,15 +57,7 @@ export async function POST(request) {
       );
     }
 
-    // Create JWT token
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    const token = await new SignJWT({
-      userId: user.id,
-      username: user.username,
-    })
-      .setProtectedHeader({ alg: 'HS256' })
-      .setExpirationTime('24h')
-      .sign(secret);
+    const token = await createJwtToken(user.id, user.name);
 
     // Create the response
     const response = NextResponse.json({
@@ -77,16 +69,7 @@ export async function POST(request) {
       },
     }, { status: 200 });
 
-    // Set the cookie
-    response.cookies.set({
-      name: 'auth_token',
-      value: token,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24, // 24 hours
-      path: '/',
-    });
+    await setAuthTokenCookie(response, token);
 
     return response;
   } catch (error) {
@@ -97,7 +80,7 @@ export async function POST(request) {
   }
 }
 
-export function OPTIONS(request) {
+export async function OPTIONS(request) {
   const response = new NextResponse(null, { status: 204 });
   addCommonHeaders(request, response);
   response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');

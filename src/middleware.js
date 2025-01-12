@@ -1,7 +1,7 @@
 'use server';
 
 import { NextResponse } from 'next/server';
-import { jwtVerify } from 'jose';
+import { verifyJwtToken } from './app/utils/jwt-serverside';
 
 // Add paths that should be excluded from authentication
 const publicPaths = [
@@ -20,17 +20,9 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
-  const token = request.cookies.get('auth_token')?.value;
-
-  if (!token) {
-    // Redirect to login if no token is present
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
   try {
     // Verify the token
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    await jwtVerify(token, secret);
+    await verifyJwtToken(request);
 
     // If token is valid, continue
     return NextResponse.next();

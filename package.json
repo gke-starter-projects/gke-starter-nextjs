@@ -20,6 +20,7 @@
     "@mui/material-nextjs": "latest",
     "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "formik": "^2.4.6",
     "jose": "^5.9.6",
@@ -32,7 +33,9 @@
     "yup": "^1.6.1"
   },
   "next": {
-    "excludeMiddleware": ["public/**/*"]
+    "excludeMiddleware": [
+      "public/**/*"
+    ]
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
