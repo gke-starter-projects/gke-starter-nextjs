@@ -1,5 +1,5 @@
 'use server';
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
   return <div>TODO</div>;
 }

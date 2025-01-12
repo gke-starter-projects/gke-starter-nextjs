@@ -3,9 +3,15 @@
 import bcrypt from 'bcrypt';
 import { NextResponse } from 'next/server';
 import { SignJWT } from 'jose';
+import * as yup from 'yup';
 import query from '../../../db';
-import validationSchema from '../../../schemas/signup';
 import addCommonHeaders from '../common-options';
+
+// Create login validation schema
+const loginSchema = yup.object().shape({
+  email: yup.string().email('Invalid email').required('Email is required'),
+  password: yup.string().required('Password is required'),
+});
 
 export async function POST(request) {
   try {
@@ -13,9 +19,8 @@ export async function POST(request) {
     const body = await request.json();
 
     try {
-      // Validate the request body using the same schema
-      const validationSchemaWithoutConfirm = validationSchema.omit(['confirmPassword']);
-      await validationSchemaWithoutConfirm.validate(body, { abortEarly: false });
+      // Validate the request body
+      await loginSchema.validate(body, { abortEarly: false });
     } catch (validationError) {
       return NextResponse.json({
         message: 'Validation failed',
@@ -23,44 +28,40 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    const { username, email, password } = body;
+    const { email, password } = body;
 
-    // Check if username or email already exists
-    const checkUserQuery = `
-      SELECT username, email
+    // Query for user by email
+    const findUserQuery = `
+      SELECT id, username, email, password
       FROM users
-      WHERE username = $1 OR email = $2
+      WHERE email = $1
     `;
-    const existingUser = await query(checkUserQuery, [username, email]);
+    const userResult = await query(findUserQuery, [email]);
 
-    if (existingUser.rows.length > 0) {
+    // Check if user exists
+    if (userResult.rows.length === 0) {
       return NextResponse.json(
-        { message: 'Username or email already exists' },
-        { status: 400 },
+        { message: 'Invalid email or password' },
+        { status: 401 },
       );
     }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = userResult.rows[0];
 
-    // Insert new user
-    const insertUserQuery = `
-      INSERT INTO users (username, email, password)
-      VALUES ($1, $2, $3)
-      RETURNING id, username, email, created_at
-    `;
-
-    const result = await query(insertUserQuery, [
-      username,
-      email,
-      hashedPassword,
-    ]);
+    // Verify password
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return NextResponse.json(
+        { message: 'Invalid email or password' },
+        { status: 401 },
+      );
+    }
 
     // Create JWT token
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const token = await new SignJWT({
-      userId: result.rows[0].id,
-      username: result.rows[0].username,
+      userId: user.id,
+      username: user.username,
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setExpirationTime('24h')
@@ -68,9 +69,13 @@ export async function POST(request) {
 
     // Create the response
     const response = NextResponse.json({
-      message: 'User created successfully',
-      user: result.rows[0],
-    }, { status: 201 });
+      message: 'Login successful',
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      },
+    }, { status: 200 });
 
     // Set the cookie
     response.cookies.set({
