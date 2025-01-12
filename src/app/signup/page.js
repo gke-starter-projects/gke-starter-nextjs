@@ -1,6 +1,6 @@
 'use server';
 
-import SignupForm from '../../components/SignupForm';
+import SignupForm from './SignupForm';
 import { handleSignup } from './api';
 
 export default async function SignupPage() {

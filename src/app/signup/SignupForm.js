@@ -12,7 +12,7 @@ import {
   Paper,
   CircularProgress,
 } from '@mui/material';
-import signupValidationSchema from '../schemas/signup';
+import signupValidationSchema from '../../schemas/signup';
 
 function SignupForm({ onSubmit = () => Promise.reject(new Error('onSubmit handler not provided')) }) {
   const initialValues = {
