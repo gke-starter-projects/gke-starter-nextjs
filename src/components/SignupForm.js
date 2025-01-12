@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useState } from 'react';
 import {
@@ -9,15 +9,15 @@ import {
   Button,
   Alert,
   Paper,
-  CircularProgress
+  CircularProgress,
 } from '@mui/material';
 
-const SignupForm = () => {
+function SignupForm() {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
 
   const [errors, setErrors] = useState({});
@@ -62,9 +62,9 @@ const SignupForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -102,7 +102,7 @@ const SignupForm = () => {
         username: '',
         email: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
       });
     } catch (error) {
       setSubmitError(error.message);
@@ -134,7 +134,7 @@ const SignupForm = () => {
           <Typography component="h1" variant="h5">
             Create your account
           </Typography>
-          
+
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <TextField
               margin="normal"
@@ -150,7 +150,7 @@ const SignupForm = () => {
               error={!!errors.username}
               helperText={errors.username}
             />
-            
+
             <TextField
               margin="normal"
               required
@@ -164,7 +164,7 @@ const SignupForm = () => {
               error={!!errors.email}
               helperText={errors.email}
             />
-            
+
             <TextField
               margin="normal"
               required
@@ -179,7 +179,7 @@ const SignupForm = () => {
               error={!!errors.password}
               helperText={errors.password}
             />
-            
+
             <TextField
               margin="normal"
               required
@@ -224,6 +224,6 @@ const SignupForm = () => {
       </Box>
     </Container>
   );
-};
+}
 
 export default SignupForm;

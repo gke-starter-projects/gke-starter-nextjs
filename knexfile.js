@@ -9,7 +9,7 @@ module.exports = {
       connectionString: process.env.DATABASE_URL
     },
     migrations: {
-      directory: './migrations',
+      directory: './src/migrations',
       tableName: 'knex_migrations'
     }
   }

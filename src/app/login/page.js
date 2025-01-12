@@ -1,3 +1,3 @@
-export default function LoginPage(){
-    return <div>TODO</div>
+export default function LoginPage() {
+  return <div>TODO</div>;
 }
