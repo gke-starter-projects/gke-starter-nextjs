@@ -12,7 +12,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 
-function SignupForm() {
+function SignupForm({ onSubmit }) {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -80,22 +80,11 @@ function SignupForm() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-        }),
+      await onSubmit({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Signup failed');
-      }
 
       setSubmitSuccess(true);
       setFormData({
@@ -225,5 +214,9 @@ function SignupForm() {
     </Container>
   );
 }
+
+SignupForm.defaultProps = {
+  onSubmit: () => Promise.reject(new Error('onSubmit handler not provided')),
+};
 
 export default SignupForm;
