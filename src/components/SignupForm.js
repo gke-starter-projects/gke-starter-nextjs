@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Formik, Form } from 'formik';
-import * as Yup from 'yup';
 import {
   Container,
   Box,
@@ -13,27 +12,7 @@ import {
   Paper,
   CircularProgress,
 } from '@mui/material';
-
-export const validationSchema = Yup.object({
-  username: Yup.string()
-    .min(3, 'Username must be at least 3 characters')
-    .max(20, 'Username must be at most 20 characters')
-    .matches(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, dashes and underscores')
-    .required('Username is required'),
-  email: Yup.string()
-    .email('Invalid email address')
-    .required('Email is required'),
-  password: Yup.string()
-    .min(8, 'Password must be at least 8 characters')
-    .matches(/[0-9]/, 'Password must contain at least one number')
-    .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .matches(/[^\w]/, 'Password must contain at least one symbol')
-    .required('Password is required'),
-  confirmPassword: Yup.string()
-    .oneOf([Yup.ref('password'), null], 'Passwords must match')
-    .required('Please confirm your password'),
-});
+import signupValidationSchema from '../schemas/signup';
 
 function SignupForm({ onSubmit = () => Promise.reject(new Error('onSubmit handler not provided')) }) {
   const initialValues = {
@@ -69,7 +48,7 @@ function SignupForm({ onSubmit = () => Promise.reject(new Error('onSubmit handle
 
           <Formik
             initialValues={initialValues}
-            validationSchema={validationSchema}
+            validationSchema={signupValidationSchema}
             onSubmit={async (values, { setSubmitting, setStatus, resetForm }) => {
               try {
                 await onSubmit({

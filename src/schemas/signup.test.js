@@ -1,4 +1,4 @@
-import { validationSchema } from './SignupForm';
+import validationSchema from './signup';
 
 describe('Validation Schema', () => {
   describe('username validation', () => {
