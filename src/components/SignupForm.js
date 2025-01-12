@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
+import { Formik, Form } from 'formik';
+import * as Yup from 'yup';
 import {
   Container,
   Box,
@@ -12,92 +14,33 @@ import {
   CircularProgress,
 } from '@mui/material';
 
-function SignupForm({ onSubmit }) {
-  const [formData, setFormData] = useState({
+export const validationSchema = Yup.object({
+  username: Yup.string()
+    .min(3, 'Username must be at least 3 characters')
+    .max(20, 'Username must be at most 20 characters')
+    .matches(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, dashes and underscores')
+    .required('Username is required'),
+  email: Yup.string()
+    .email('Invalid email address')
+    .required('Email is required'),
+  password: Yup.string()
+    .min(8, 'Password must be at least 8 characters')
+    .matches(/[0-9]/, 'Password must contain at least one number')
+    .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
+    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .matches(/[^\w]/, 'Password must contain at least one symbol')
+    .required('Password is required'),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref('password'), null], 'Passwords must match')
+    .required('Please confirm your password'),
+});
+
+function SignupForm({ onSubmit = () => Promise.reject(new Error('onSubmit handler not provided')) }) {
+  const initialValues = {
     username: '',
     email: '',
     password: '',
     confirmPassword: '',
-  });
-
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState('');
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    // Username validation
-    if (!formData.username) {
-      newErrors.username = 'Username is required';
-    } else if (formData.username.length < 3) {
-      newErrors.username = 'Username must be at least 3 characters';
-    }
-
-    // Email validation
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
-    }
-
-    // Password validation
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
-    }
-
-    // Confirm password validation
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitError('');
-    setSubmitSuccess(false);
-
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      await onSubmit({
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
-      });
-
-      setSubmitSuccess(true);
-      setFormData({
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-      });
-    } catch (error) {
-      setSubmitError(error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   return (
@@ -124,99 +67,123 @@ function SignupForm({ onSubmit }) {
             Create your account
           </Typography>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="username"
-              label="Username"
-              name="username"
-              autoComplete="username"
-              autoFocus
-              value={formData.username}
-              onChange={handleChange}
-              error={!!errors.username}
-              helperText={errors.username}
-            />
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={async (values, { setSubmitting, setStatus, resetForm }) => {
+              try {
+                await onSubmit({
+                  username: values.username,
+                  email: values.email,
+                  password: values.password,
+                });
+                setStatus({ success: 'Account created successfully!' });
+                resetForm();
+              } catch (error) {
+                setStatus({ error: error.message });
+              } finally {
+                setSubmitting(false);
+              }
+            }}
+          >
+            {({
+              errors, touched, handleChange, handleBlur, values, isSubmitting, status,
+            }) => (
+              <Box component={Form} sx={{ mt: 3 }}>
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="username"
+                  label="Username"
+                  name="username"
+                  autoComplete="username"
+                  autoFocus
+                  value={values.username}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touched.username && !!errors.username}
+                  helperText={touched.username && errors.username}
+                />
 
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              value={formData.email}
-              onChange={handleChange}
-              error={!!errors.email}
-              helperText={errors.email}
-            />
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="email"
+                  label="Email Address"
+                  name="email"
+                  autoComplete="email"
+                  value={values.email}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touched.email && !!errors.email}
+                  helperText={touched.email && errors.email}
+                />
 
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="new-password"
-              value={formData.password}
-              onChange={handleChange}
-              error={!!errors.password}
-              helperText={errors.password}
-            />
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  name="password"
+                  label="Password"
+                  type="password"
+                  id="password"
+                  autoComplete="new-password"
+                  value={values.password}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touched.password && !!errors.password}
+                  helperText={touched.password && errors.password}
+                />
 
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="confirmPassword"
-              label="Confirm Password"
-              type="password"
-              id="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              error={!!errors.confirmPassword}
-              helperText={errors.confirmPassword}
-            />
+                <TextField
+                  margin="normal"
+                  required
+                  fullWidth
+                  name="confirmPassword"
+                  label="Confirm Password"
+                  type="password"
+                  id="confirmPassword"
+                  value={values.confirmPassword}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touched.confirmPassword && !!errors.confirmPassword}
+                  helperText={touched.confirmPassword && errors.confirmPassword}
+                />
 
-            {submitError && (
-              <Alert severity="error" sx={{ mt: 2 }}>
-                {submitError}
-              </Alert>
+                {status?.error && (
+                <Alert severity="error" sx={{ mt: 2 }}>
+                  {status.error}
+                </Alert>
+                )}
+
+                {status?.success && (
+                <Alert severity="success" sx={{ mt: 2 }}>
+                  {status.success}
+                </Alert>
+                )}
+
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  sx={{ mt: 3, mb: 2 }}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    'Sign Up'
+                  )}
+                </Button>
+              </Box>
             )}
-
-            {submitSuccess && (
-              <Alert severity="success" sx={{ mt: 2 }}>
-                Account created successfully!
-              </Alert>
-            )}
-
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                'Sign Up'
-              )}
-            </Button>
-          </Box>
+          </Formik>
         </Paper>
       </Box>
     </Container>
   );
 }
-
-SignupForm.defaultProps = {
-  onSubmit: () => Promise.reject(new Error('onSubmit handler not provided')),
-};
 
 export default SignupForm;
