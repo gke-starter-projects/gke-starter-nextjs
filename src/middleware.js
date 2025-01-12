@@ -1,9 +1,8 @@
 'use server';
 
 import { NextResponse } from 'next/server';
-import { verifyJwtToken } from './app/utils/jwt-serverside';
+import { verifyJwtToken, createJwtToken, setAuthTokenCookie } from './app/utils/jwt-serverside';
 
-// Add paths that should be excluded from authentication
 const publicPaths = [
   '/api/signup',
   '/api/login',
@@ -21,11 +20,19 @@ export async function middleware(request) {
   }
 
   try {
-    // Verify the token
-    await verifyJwtToken(request);
+    // Verify the current token
+    const { userId, userName } = await verifyJwtToken(request);
 
-    // If token is valid, continue
-    return NextResponse.next();
+    // Generate a new token
+    const newToken = await createJwtToken(userId, userName);
+
+    // Create the response
+    const response = NextResponse.next();
+
+    // Set the new token in the cookie
+    await setAuthTokenCookie(response, newToken);
+
+    return response;
   } catch (error) {
     // If token is invalid, clear the cookie and redirect to login
     const response = NextResponse.redirect(new URL('/login', request.url));

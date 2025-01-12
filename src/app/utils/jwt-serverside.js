@@ -8,15 +8,16 @@ const JWT_EXPIRATION_TIME = '1h'; // 1 hour
 const COOKIE_EXPIRATION_TIME = 1 * 60 * 60; // 1 hour (https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie)
 
 export const createJwtToken = async (userId, userName) => {
-  // Create JWT token
   const secret = new TextEncoder().encode(process.env.JWT_SECRET);
   const token = await new SignJWT({
     userId,
     userName,
+    iat: Date.now(),
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime(JWT_EXPIRATION_TIME)
     .sign(secret);
+
   return token;
 };
 
@@ -34,7 +35,6 @@ export const verifyJwtToken = async (request = null) => {
 };
 
 export const setAuthTokenCookie = async (response, token) => {
-  // Set the cookie
   response.cookies.set({
     name: AUTH_TOKEN_COOKIE_KEY,
     value: token,
@@ -44,10 +44,4 @@ export const setAuthTokenCookie = async (response, token) => {
     maxAge: COOKIE_EXPIRATION_TIME,
     path: '/',
   });
-};
-
-export const updateJwtToken = async (response) => {
-  const { userId, userName } = await verifyJwtToken();
-  const token = await createJwtToken(userId, userName);
-  await setAuthTokenCookie(response, token);
 };
