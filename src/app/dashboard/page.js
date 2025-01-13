@@ -5,37 +5,43 @@ import { revalidatePath } from 'next/cache';
 import { verifyJwtToken } from '../utils/jwt-serverside';
 import query from '../../db';
 
-// Mark the server action explicitly
+// Server action to post tweet
 const postTweet = async (formData) => {
   'use server';
 
   const content = formData.get('content');
   const { userId } = await verifyJwtToken();
-
   const insertTweetQuery = `
     INSERT INTO tweets (user_id, content)
     VALUES ($1, $2)
     RETURNING id
   `;
-
   await query(insertTweetQuery, [userId, content]);
   revalidatePath('/dashboard');
 };
 
-// Server action to fetch tweets with user information
+// Using dynamic data fetching
 async function getTweets() {
   'use server';
 
-  const tweetsQuery = `
-    SELECT t.id, t.content, t.created_at,
-           u.username, u.id as user_id
-    FROM tweets t
-    JOIN users u ON t.user_id = u.id
-    ORDER BY t.created_at DESC
-  `;
-  const tweets = await query(tweetsQuery);
-  return tweets.rows;
+  try {
+    const tweetsQuery = `
+      SELECT t.id, t.content, t.created_at,
+             u.username, u.id as user_id
+      FROM tweets t
+      JOIN users u ON t.user_id = u.id
+      ORDER BY t.created_at DESC
+    `;
+    const tweets = await query(tweetsQuery);
+    return tweets.rows;
+  } catch (error) {
+    console.error('Error fetching tweets:', error);
+    return [];
+  }
 }
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function DashboardPage() {
   const tweets = await getTweets();
@@ -67,7 +73,6 @@ export default async function DashboardPage() {
           </form>
         </CardContent>
       </Card>
-
       {tweets.map((tweet) => (
         <Card key={tweet.id} sx={{ marginBottom: 2 }}>
           <CardContent>

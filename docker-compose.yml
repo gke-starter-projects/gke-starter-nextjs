@@ -1,9 +1,32 @@
 version: "3.9"
 services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgres://root:password@postgres:5432/postgres
+      - JWT_SECRET=whatever
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    restart: always
+  migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrations
+    environment:
+      - DATABASE_URL=postgres://root:password@postgres:5432/postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
   postgres:
     image: postgres
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -q -d postgres -U root" ]
+      test: ["CMD-SHELL", "pg_isready -q -d postgres -U root"]
       timeout: 45s
       interval: 10s
       retries: 10
@@ -14,4 +37,4 @@ services:
     volumes:
       - ./db:/docker-entrypoint-initdb.d/
     ports:
-      - 5432:5432
+      - "5432:5432"

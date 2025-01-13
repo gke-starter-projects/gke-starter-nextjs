@@ -1,6 +1,6 @@
 'use server';
 
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { NextResponse } from 'next/server';
 import * as yup from 'yup';
 import query from '../../../db';

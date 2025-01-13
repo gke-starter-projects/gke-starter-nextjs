@@ -1,0 +1,41 @@
+# Node.js
+node_modules
+npm-debug.log
+yarn-error.log
+yarn.lock
+
+# Next.js
+.next
+out
+.next/cache
+dist
+
+# Version control
+.git
+.gitignore
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE and editor folders
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# Environment files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Optional: include other files and folders that are not part of the source code
+coverage/
+logs/
+temp/
+
+# custom
+scratch
+db

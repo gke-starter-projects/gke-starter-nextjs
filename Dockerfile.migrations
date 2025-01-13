@@ -1,0 +1,16 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY knexfile.js ./
+
+# Copy migrations folder
+COPY src/migrations ./src/migrations
+
+# Install dependencies
+RUN npm ci
+
+# Run migrations
+CMD ["npx", "knex", "migrate:latest"]
