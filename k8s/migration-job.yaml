@@ -3,10 +3,9 @@ kind: Job
 metadata:
   name: gke-starter-nextjs-db-migrations
 spec:
+  backoffLimit: 4
   template:
     spec:
-      shareProcessNamespace: true
-      terminationGracePeriodSeconds: 0
       containers:
       - name: migrations
         image: <MIGRATION_IMAGE_PLACEHOLDER>
@@ -16,18 +15,4 @@ spec:
               secretKeyRef:
                 name: gke-starter-nextjs-secrets
                 key: DATABASE_URL
-      - name: cloud-sql-proxy
-        image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.14.1
-        args:
-          - "--private-ip"
-          - "--auto-iam-authn"
-          - "--structured-logs"
-          - "--port=5432"
-          - "starter-project-447001:us-central1:starter-project"
-        # This tells Kubernetes this is a sidecar container
-        lifecycle:
-          preStop:
-            exec:
-              command: ["/bin/sh", "-c", "kill -15 1"]
       restartPolicy: Never
-  backoffLimit: 4
