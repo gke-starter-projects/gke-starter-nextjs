@@ -69,16 +69,16 @@ jobs:
         # Wait for migrations to complete
         echo "Waiting for migrations to complete..."
         while true; do
-          status=$(kubectl get job db-migrations -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}')
+          status=$(kubectl get job gke-starter-nextjs-db-migrations -o jsonpath='{.status.conditions[?(@.type=="Complete")].status}')
           if [ "$status" == "True" ]; then
             echo "Migrations completed successfully"
             break
           fi
           
-          failed=$(kubectl get job db-migrations -o jsonpath='{.status.conditions[?(@.type=="Failed")].status}')
+          failed=$(kubectl get job gke-starter-nextjs-db-migrations -o jsonpath='{.status.conditions[?(@.type=="Failed")].status}')
           if [ "$failed" == "True" ]; then
             echo "Migrations failed"
-            kubectl logs job/db-migrations -c migrations
+            kubectl logs job/gke-starter-nextjs-db-migrations -c migrations
             exit 1
           fi
           
@@ -87,7 +87,7 @@ jobs:
         done
         
         # Delete the migration job
-        kubectl delete job db-migrations
+        kubectl delete job gke-starter-nextjs-db-migrations
         
         # Apply main application
         kubectl apply -f k8s/deployment.yaml
