@@ -3,6 +3,7 @@
 import PropTypes from 'prop-types';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+// import { useState } from 'react';
 
 // Create a styled "span" component with Material-UI
 const StyledBadge = styled('span')(({ theme, color }) => ({
@@ -14,9 +15,19 @@ const StyledBadge = styled('span')(({ theme, color }) => ({
   display: 'inline-block',
 }));
 
-function Badge({ color, children }) {
+// const syncWithDatabase = (id, newText) => {
+//   ...
+// }
+
+function Badge({ id, color, children }) {
+  // const [text, setText] = useState(children);
+
+  // const handleChange = (newText) => {
+  //   syncWithDatabase(id, newText);
+  // };
+
   return (
-    <StyledBadge color={color}>
+    <StyledBadge id={id} color={color}>
       <Typography variant="body2">{children}</Typography>
     </StyledBadge>
   );
