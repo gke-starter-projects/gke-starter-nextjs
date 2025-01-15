@@ -39,6 +39,8 @@ function RecursiveElement({ node }) {
   const style = {};
   if (otherProps.bold === true) {
     style.fontWeight = 'bold';
+  } else {
+    style.fontWeight = 'normal';
   }
   if (otherProps.underline === true) {
     style.textDecoration = 'underline';
