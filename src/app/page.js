@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Container from '@mui/material/Container';
 import content from './input.json';
-import RecursiveElement from './RecursiveElement';
+import RecursiveElement from '../components/RecursiveElement';
 
 export default function Home() {
   return (
