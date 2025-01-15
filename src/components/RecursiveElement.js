@@ -14,14 +14,25 @@ function RecursiveElement({ node }) {
   if (typeof node === 'string' || node?.text) {
     const textContent = node?.text || node;
     const textStyle = {};
+
     if (node?.bold) {
       textStyle.fontWeight = 'bold';
     }
     if (node?.underline) {
       textStyle.textDecoration = 'underline';
     }
-    // Apply text styles if bold or underline properties are true
-    return <span style={textStyle}>{textContent}</span>;
+
+    // Split text by newlines and render with breaks
+    return (
+      <span style={textStyle}>
+        {textContent.split('\n').map((line, index, array) => (
+          <React.Fragment key={Math.random()}>
+            {line}
+            {index < array.length - 1 && <br />}
+          </React.Fragment>
+        ))}
+      </span>
+    );
   }
 
   // Process styles and extract remaining props
