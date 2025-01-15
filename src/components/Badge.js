@@ -6,7 +6,7 @@ import Typography from '@mui/material/Typography';
 
 // Create a styled "span" component with Material-UI
 const StyledBadge = styled('span')(({ theme, color }) => ({
-  padding: theme.spacing(0.5, 1),
+  padding: theme.spacing(0.25, 0.25),
   borderRadius: theme.shape.borderRadius,
   backgroundColor: color,
   color: theme.palette.common.white,

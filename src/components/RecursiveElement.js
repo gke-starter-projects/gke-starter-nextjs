@@ -12,7 +12,16 @@ function RecursiveElement({ node }) {
 
   // If node is a text node (leaf node)
   if (typeof node === 'string' || node?.text) {
-    return node?.text || node;
+    const textContent = node?.text || node;
+    const textStyle = {};
+    if (node?.bold) {
+      textStyle.fontWeight = 'bold';
+    }
+    if (node?.underline) {
+      textStyle.textDecoration = 'underline';
+    }
+    // Apply text styles if bold or underline properties are true
+    return <span style={textStyle}>{textContent}</span>;
   }
 
   // Process styles and extract remaining props
@@ -26,6 +35,15 @@ function RecursiveElement({ node }) {
     mention: Badge,
   };
 
+  // Determine if the element needs to be bold or underlined
+  const style = {};
+  if (otherProps.bold === true) {
+    style.fontWeight = 'bold';
+  }
+  if (otherProps.underline === true) {
+    style.textDecoration = 'underline';
+  }
+
   // Use React.Fragment if type resolves to undefined
   const elementType = type ? get(specialElementLut, type, type) : React.Fragment;
 
@@ -36,10 +54,10 @@ function RecursiveElement({ node }) {
     ))
     : children;
 
-  // Return the Element with recursively rendered children
   return (
     <Element
       as={elementType}
+      style={style}
       {...otherProps}
     >
       {renderedChildren}
