@@ -1,16 +1,30 @@
-import PropTypes from 'prop-types';
-const Badge = ({ color, children }) => (
-    <span 
-      className="px-2 py-1 rounded text-white text-sm"
-      style={{ backgroundColor: color }}
-    >
-      {children}
-    </span>
-  );
-  
-  Badge.propTypes = {
-    color: PropTypes.string.isRequired,
-    children: PropTypes.node.isRequired,
-  };
+'use client';
 
-  export default Badge;
+import PropTypes from 'prop-types';
+import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
+
+// Create a styled "span" component with Material-UI
+const StyledBadge = styled('span')(({ theme, color }) => ({
+  padding: theme.spacing(0.5, 1),
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: color,
+  color: theme.palette.common.white,
+  fontSize: theme.typography.pxToRem(12),
+  display: 'inline-block',
+}));
+
+function Badge({ color, children }) {
+  return (
+    <StyledBadge color={color}>
+      <Typography variant="body2">{children}</Typography>
+    </StyledBadge>
+  );
+}
+
+Badge.propTypes = {
+  color: PropTypes.string.isRequired,
+  children: PropTypes.node.isRequired,
+};
+
+export default Badge;

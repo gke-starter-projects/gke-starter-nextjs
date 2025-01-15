@@ -1,28 +1,13 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import get from 'lodash/get';
-import Badge from './Badge';
 import Element from './Element';
-
-// Process styles and combine with other props
-const processStyles = (node) => {
-  const { color, style, ...rest } = node;
-
-  const styles = {
-    ...(style || {}),
-    ...(color ? { color } : {}),
-  };
-
-  return {
-    ...(Object.keys(styles).length > 0 ? { style: styles } : {}),
-    ...rest,
-  };
-};
+import Badge from './Badge';
 
 function RecursiveElement({ node }) {
-  // If node is a text node (leaf node) with color, render as badge
-  if (node?.text && node?.color) {
-    return <Badge color={node.color}>{node.text}</Badge>;
+  // If node is null or undefined
+  if (!node) {
+    return null;
   }
 
   // If node is a text node (leaf node)
@@ -30,19 +15,15 @@ function RecursiveElement({ node }) {
     return node?.text || node;
   }
 
-  // If node is null or undefined
-  if (!node) {
-    return null;
-  }
-
   // Process styles and extract remaining props
-  const { children, type, ...otherProps } = processStyles(node);
+  const { children, type, ...otherProps } = node;
 
   const specialElementLut = {
+    p: 'div', // Better for SEO allegedly
     block: 'div',
     clause: 'span',
     lic: 'span',
-    mention: 'span',
+    mention: Badge,
   };
 
   // Use React.Fragment if type resolves to undefined
